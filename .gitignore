@@ -13,6 +13,8 @@ backend/.env
 backend/credentials.json
 backend/serviceAccount.json
 backend/token.json
+frontend/.env
+frontend/.env.*
 
 # frontend deps/build
 frontend/node_modules/
