@@ -19,7 +19,9 @@ a minimal full-stack app showing **Agentic AI** in action using the **Model Cont
 ## setup
 
 ### prerequisites
-- Python 3.10+, Node.js, PostgreSQL
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL (optional). by default it runs on SQLite.
 
 ### backend
 ```bash
@@ -35,6 +37,8 @@ export GROQ_API_KEY="your-groq-api-key"
 export DOCTOR_USERNAME="akshat"
 export DOCTOR_PASSWORD="akshat123"
 ```
+
+if you want sqlite only, skip `DATABASE_URL` and it will use local `appointments.db`.
 
 run it:
 ```bash
@@ -54,15 +58,81 @@ npm run dev -- --port 5173
 
 ## things to try
 
+## sample prompts
+
 **as a patient:**
 - *"What times are available for Dr. Akshat Shukla tomorrow morning?"*
-- *"Book an appointment with Dr. Akshat Shukla for Jane Doe at 10 AM tomorrow."*
+- *"Book an appointment with Dr. Akshat Shukla for Sahil Rana at 10 AM tomorrow."*
+- *"Book Dr. Akshat on 2026-03-20 at 14:30 for Rahul Mehra, fever and headache."*
+- *"I want evening slots with Dr. Akshat on 2026-03-21."*
 
 > heads up: the assistant will ask for a patient name if you forget to include one.
 
 **as a doctor:**
 - log in on the frontend and hit **"Generate Today's Report"**
 - or just type: *"Generate the summary report for 2024-11-20."*
+- *"Show upcoming appointments."*
+- *"Show tomorrow appointments."*
+
+---
+
+## api usage summary
+
+base url:
+- backend: `http://127.0.0.1:8030`
+
+main endpoints:
+
+1. `POST /chat`
+used by patient/doctor chat flow.
+
+request body:
+```json
+{
+	"message": "book dr akshat tomorrow at 10:00 for john doe",
+	"history": [],
+	"role": "patient"
+}
+```
+
+2. `POST /doctor/login`
+simple doctor-only login check.
+
+request body:
+```json
+{
+	"username": "akshat",
+	"password": "akshat123"
+}
+```
+
+3. `POST /doctor/report`
+generates a daily summary report and pushes firestore notification.
+
+request body:
+```json
+{
+	"date": "2026-03-15"
+}
+```
+
+4. `POST /doctor/appointments`
+returns structured doctor appointment list.
+
+request body:
+```json
+{
+	"scope": "upcoming",
+	"date": null
+}
+```
+
+scope values:
+- `today`
+- `tomorrow`
+- `upcoming`
+- `all`
+- `custom` (send date too)
 
 ---
 
