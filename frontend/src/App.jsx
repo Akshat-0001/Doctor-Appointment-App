@@ -51,11 +51,10 @@ function Auth({ setRole }) {
   return (
     <div className="login-screen">
       <div className="login-card">
-        <div className="logo">{doctorMode ? '👨‍⚕️' : '🏥'}</div>
         <h1>{doctorMode ? 'Doctor Login' : 'Doctor Appointment Assistant'}</h1>
 
         {!doctorMode ? (
-          <div className="row">
+          <div className="row auth-buttons">
             <button className="btn blue" onClick={() => setRole('patient')}>Patient</button>
             <button className="btn green" onClick={() => setDoctorMode(true)}>Doctor</button>
           </div>
@@ -66,7 +65,7 @@ function Auth({ setRole }) {
               <input className="input" type="password" placeholder="Password" value={p} onChange={e => setP(e.target.value)} onKeyDown={e => e.key === 'Enter' && login()} />
               {err && <div className="status">{err}</div>}
             </div>
-            <div className="row">
+            <div className="row auth-actions">
               <button className="btn ghost" onClick={() => setDoctorMode(false)}>Back</button>
               <button className="btn green" onClick={login} disabled={loading}>{loading ? 'Signing in...' : 'Login'}</button>
             </div>

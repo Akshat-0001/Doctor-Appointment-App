@@ -2,6 +2,10 @@
 
 a minimal full-stack app showing **Agentic AI** in action using the **Model Context Protocol**. patients can book appointments through a chat interface, and doctors get a dashboard with ai-generated daily summaries.
 
+## walkthrough
+
+![App walkthrough](frontend/assets/walkthrough-video.gif)
+
 ## how it's built
 
 - **Frontend (React)** — chat UI for patients + doctor dashboard
