@@ -1,5 +1,6 @@
 import os
-from datetime import date, timedelta
+import json
+from datetime import date
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -75,51 +76,21 @@ async def doctor_login(req: DoctorLoginRequest):
 @app.post('/doctor/report')
 async def doctor_report(req: DoctorReportRequest):
     # build daily doctor report
-    from tools.doctor_summary import doctor_summary_report
-
+    from agent import call_mcp_tool
     d = req.date or str(date.today())
-    return {"date": d, "report": doctor_summary_report(d)}
+    return {"date": d, "report": await call_mcp_tool('doctor_summary_report_tool', {"date": d})}
 
 
 @app.post('/doctor/appointments')
 async def doctor_appointments(req: DoctorAppointmentsRequest):
     # fetch filtered appointments list
-    today = str(date.today())
-    tomorrow = str(date.today() + timedelta(days=1))
+    from agent import call_mcp_tool
     scope = (req.scope or 'upcoming').lower().strip()
-
-    db = database.SessionLocal()
+    text = await call_mcp_tool('doctor_appointments_tool', {"scope": scope, "date_value": req.date or ""})
     try:
-        q = db.query(models.Appointment).filter(models.Appointment.doctor_name.ilike('%Akshat Shukla%'))
-        if scope == 'today':
-            q = q.filter(models.Appointment.date == today)
-        elif scope == 'tomorrow':
-            q = q.filter(models.Appointment.date == tomorrow)
-        elif scope == 'custom' and req.date:
-            q = q.filter(models.Appointment.date == req.date)
-        elif scope != 'all':
-            q = q.filter(models.Appointment.date >= today)
-
-        rows = q.order_by(models.Appointment.date.asc(), models.Appointment.time.asc()).all()
-        return {
-            "scope": scope,
-            "date": req.date,
-            "count": len(rows),
-            "appointments": [
-                {
-                    "id": a.id,
-                    "doctor_name": a.doctor_name,
-                    "patient_name": a.patient_name,
-                    "date": a.date,
-                    "time": a.time,
-                    "reason": a.reason,
-                    "status": a.status,
-                }
-                for a in rows
-            ],
-        }
-    finally:
-        db.close()
+        return json.loads(text)
+    except Exception:
+        raise HTTPException(500, 'Invalid MCP response for appointments.')
 
 
 if __name__ == '__main__':

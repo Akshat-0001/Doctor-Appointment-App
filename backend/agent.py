@@ -103,3 +103,17 @@ async def get_mcp_response(messages: list) -> str:
 
             final = _clean(client.chat.completions.create(model=MODEL, messages=convo).choices[0].message.content)
             return final if final and final.lower() not in {'done', 'done.'} else ('\n\n'.join(outputs) or 'Done.')
+
+
+async def call_mcp_tool(tool_name: str, args: dict | None = None) -> str:
+    # call one mcp tool directly
+    args = args or {}
+    server = StdioServerParameters(command=sys.executable, args=[os.path.join(os.path.dirname(__file__), 'mcp_server.py')])
+    async with stdio_client(server) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            names = {t.name for t in (await session.list_tools()).tools}
+            if tool_name not in names:
+                raise ValueError(f'Tool not found: {tool_name}')
+            r = await session.call_tool(tool_name, args)
+            return '\n'.join(c.text for c in r.content if c.type == 'text').strip()
